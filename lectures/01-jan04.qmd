@@ -1,0 +1,13 @@
+---
+title: "01-jan04"
+format: gfm
+editor: visual
+---
+
+
+```{r setup}
+
+options(mc.cores = parallel::detectCores(logical=FALSE))
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+setwd(rprojroot::find_rstudio_root_file())
+```
