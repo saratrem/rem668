@@ -4,10 +4,21 @@ format: gfm
 editor: visual
 ---
 
-
 ```{r setup}
 
 options(mc.cores = parallel::detectCores(logical=FALSE))
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
 setwd(rprojroot::find_rstudio_root_file())
 ```
+
+good modeler practice :
+
+within the function, make sure you write the attributes
+
+```{r}
+v <- seq(from = 1, to = 4, by = 1)
+```
+
+What is a R object? 
+
+anything that is saved in the global environment 
