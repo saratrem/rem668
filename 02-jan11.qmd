@@ -1,0 +1,13 @@
+---
+title: "02-jan11"
+format: gfm
+editor: visual
+---
+
+```{r setup}
+library(tidyverse)
+library(ggplot2)
+options(mc.cores = parallel::detectCores(logical=FALSE))
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+setwd(rprojroot::find_rstudio_root_file())
+```
