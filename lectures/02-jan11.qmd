@@ -11,3 +11,57 @@ options(mc.cores = parallel::detectCores(logical=FALSE))
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
 setwd(rprojroot::find_rstudio_root_file())
 ```
+
+
+
+
+```{r}
+
+vec <- 1:10
+A <- 1:10
+B <- seq(from = 1, to = 2, length = 10)
+C <- rep(1,10)
+D <- cbind(A,B,C)
+
+D <- LETTERS[1:10]
+
+E <- cbind(A,B,C, D) 
+
+# change everything in characters bc vector/matrix changes everything into same class
+
+E <- list(A,B,C,D, F = 1:25)
+# list has 2 brackets ]] 
+# list allows dif. class
+
+# you can either access with brackets [[]] for the columns, 
+# or the $ is you assigned a name 
+
+# what is a data.frame ?
+# mixed of list and matrix = allows dif. classes but all the elements are the same length 
+
+G <- data.frame(A=A, B=B, C=C)
+
+# look at the object mode or class
+
+#to select 3 cols only, with all the rows: 
+m <- as.matrix( G[,1:3])
+m <- as.matrix( G[,c("A", "B", "C")]) # i personnally prefer this bc it calls the actual name, not the nbrs, so less change of a mistake  
+
+#array s
+
+K <- array(data = NA, dim = c(2,3,4))
+
+#reshape package and melt function
+# check nest data 
+
+# you can use function scan  to read a series of numbers
+# - helpful to reading crazy data file from old pdf ... like ebmd
+
+#LOOOOOOPPPPSSS !!!!!!!!
+#creating a vector 
+B <- rep(NA,9)
+for( i in 2:10){
+  B[i] <- A[i-1] +3
+}
+
+```
