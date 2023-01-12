@@ -12,9 +12,6 @@ knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
 setwd(rprojroot::find_rstudio_root_file())
 ```
 
-
-
-
 ```{r}
 
 vec <- 1:10
@@ -64,4 +61,64 @@ for( i in 2:10){
   B[i] <- A[i-1] +3
 }
 
+```
+
+## Creating model
+
+expGrowth
+
+written by Brett
+
+Jan 11,2023
+
+This code estimates exponential growth for lakes in 7 regions in BC, it returns tgh number in each region where it declines occur.
+
+*pseudo code* :
+
+( what is pseudocode : step by step description of the coding )
+
+1\. set the working directory
+
+2\. copy count data into the working directory
+
+3\. input the data using read.table
+
+4\. set DecliningPopCount to Zero
+
+5\. Loop over lakes
+
+5a. extract NT and N0 observations
+
+5b. compute growth rate 5c. increment DecliningPopCount if negative growth rate
+
+6\. report decliningPopCount using print() or cat()
+
+```{r creating model}
+#this is incase you dont use github and project folders
+#this library allows you to write to path
+install.packages("here")
+library(here)
+
+#path <- here() 
+
+#save data 
+data <- read.table(file = "data/lecture2/Counts1.dat", header = TRUE, sep = "")
+
+#decliningPopCount is a counter for the nbrs of declining poopulation
+
+decliningpopcount <- 0
+#determine number of lakes
+nlake <- nrow(data)
+#nbrs of years between observation 
+nyr <- 10
+
+#loop over lakes
+for (i in 1:nlake){
+  NT <- data[i,'NT']
+  N0 <- data[i,'N0']
+  g <- log(NT / N0)/ nyr
+  if( g < 0) decliningpopcount <- decliningpopcount + 1
+}
+
+cat("the number of lakes with declining abundance is", decliningpopcount)
 ```
