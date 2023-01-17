@@ -102,8 +102,10 @@ This code estimates exponential growth for lakes in 7 regions in BC, it returns 
 #path <- here() 
 
 #save data 
-data <- read.table(file = "data/lecture2/Counts1.dat", header = TRUE, sep = "")
-
+decline <- function(region){
+  
+data <- read.table(file = paste0("data/lecture2/Counts",region, ".dat"), header = TRUE, sep = "")
+#sprintf("data/lecture2/Counts%s.dat", region) we could use this tooo
 #decliningPopCount is a counter for the nbrs of declining poopulation
 
 decliningpopcount <- 0
@@ -112,6 +114,9 @@ nlake <- nrow(data)
 #nbrs of years between observation 
 nyr <- 10
 
+
+#growth model being used : NT= NO *exp(g*T)
+# re-rrange to solve for g : g(log NT/N0/T)
 #loop over lakes
 for (i in 1:nlake){
   NT <- data[i,'NT']
@@ -120,5 +125,44 @@ for (i in 1:nlake){
   if( g < 0) decliningpopcount <- decliningpopcount + 1
 }
 
-cat("the number of lakes with declining abundance is", decliningpopcount)
+
+
+#data %>% group_by (lake) %>% 
+
+N0 <- data[, 'N0']
+NT <- data[, 'NT']
+g <- log(NT/N0) / nyr
+decliningpopcount <- sum(g < 0)
+return(g)
+} 
+
+
+
+decline(region = 3)
+
+region <- c(1:7)
+region_name <- sprintf("%s", region)
+
+df <- lapply(X = region, decline)
+map(region, decline)
+
+han <- df %>% tibble() %>%  unnest(cols = c(.))
+# to get all to data :
+
+han <- cbind(df, region_name)
+
+
+han <- do.call(cbind, df) 
+colnames(han) <- c(region_name)
+
+han %>% as_tibble()
+
+#this is what hannah watkins would doooo! (withut thinking about it, she didnt spend (like me ) one hour on it)
+empty <- NULL
+for(i in 1:length(df)){
+  han_df <- tibble(g = df[[i]]) %>% 
+    transmute( region = i, g = g) 
+  empty <- rbind(empty, han_df)
+}
+
 ```
