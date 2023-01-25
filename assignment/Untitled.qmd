@@ -6,15 +6,27 @@ editor: visual
 
 
 
-```{r}
-1 + 1
+```{r setup}
+library(tidyverse)
+library(ggplot2)
+options(mc.cores = parallel::detectCores(logical=FALSE))
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+setwd(rprojroot::find_rstudio_root_file())
 ```
 
-You can add options to executable code like this
+https://www.weirdfishes.blog/blog/practical-purrr/
+https://r4ds.had.co.nz/many-models.html#nested-data
+https://cran.r-project.org/web/packages/broom/vignettes/broom_and_dplyr.html
 
-```{r}
-#| echo: false
-2 * 2
-```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+
+Pseudocode: 
+1 : download data 
+2 : create nested data with purrr package 
+3: create a function for Ricker spawner/recruit relationship:
+log( Recruit/Spawners ) = alpha - beta * Spawners
+
+this function should take the appropriate stock to Spawner/recruits
+4. using map2(), apply the lm() to the stocks
+5. back-transform the coefficients to normal space 
+6. Create a graph for each stock that shows : 
