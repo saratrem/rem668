@@ -4,23 +4,65 @@ format: gfm
 editor: visual
 ---
 
-## Quarto
+## Week 5 : Population growth
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+logistic model : N(t+1) = N(t) + r * Nt ( 1 - N(t)/R)
 
-## Running Code
+They can be changed in linear model :
 
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+ln(Nt/N0) = Rt
+t is your independant variable
 
-```{r}
-1 + 1
+Today we want to simulate an exponential growth process of 'caribou'. 
+
+step 1 : set some parameters to control the simulation
+step2 : create some vectors to fill with abundance and counts  ( count is calcuclated by fly over the population and count numbers of cariboo, so we count with errors)
+step 3: set the initial abundance: N0 = initN
+step 4 : create a for loop to simulate abundance over time 
+step 5 : simulate counting with observation errors
+step 6: plot results 
+
+```{r sim exponential growth model}
+# step 1 : set some paraeters to control the simulation
+
+
+nt <- 10         # number of years 
+initN <- 2000    # intial abundance
+r <- -0.04       # exponential growth rate 
+cv <- 0.10 # lognormal standard deviation (coefificant of variation)
+
+# 2 . vectors to fill
+
+ N <- vector(length = nt)
+ C <- vector(length = nt)
+
+ 
+ #3 set the initiati abundence : No = initi NT
+ N [1] <- initN
+ 
+ # 4 : create  for loop 
+ for( i in 2:nt){
+   N[i] = N[i-1] *exp(r)
+ }
+ 
+ #5 simulation counting with errors 
+ # N[t] = N[t] * e[w]
+ 
+ C = N * exp(cv* rnorm (n = nt,mean = 0, sd = 1) - cv^2/2)  # ths is the same than rlognormal
+ # there is a bias in rnorm in log space, so you have to ajust for that 
+ 
+ # 6 plot the graphs
+ plot(1:nt,C, ylim = c(0,2250), ylab = "Counts", xlab = "time", pch = 19, col = "red")
+ lines(1 :nt, N, col = "blue", lwd = 3)
+ 
+ # brett doesnt recommand to use log normal for cv in this case, because it as not a continuous count, it is discrete count.  
+ 
+ 
+ # why erros is always cv in 
+ #r (t) = E(t) * survival of eggs * survival egg 2 
+ 
+ # everyone of this component have errors, so everytime you have errors and multiple errors, it is a lognormal process. if it was added, then it would be normal process
+ 
+ # basically, are all the error additive or multiplicative ? 
 ```
 
-You can add options to executable code like this
-
-```{r}
-#| echo: false
-2 * 2
-```
-
-The `echo: false` option disables the printing of code (only output is displayed).
