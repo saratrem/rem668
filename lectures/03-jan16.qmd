@@ -4,8 +4,33 @@ format: gfm
 editor: visual
 ---
 
-## Quarto
+## Linear model 
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+Models needs parameters :
 
-## Running Code
+first : create the strucutre and functions of a model
+- parameters dictate rates
+- how  to determine parameters? guess, isolated experiements, compare models predictions to data 
+
+sub model - state dynamics model 
+it generate the population dynamic
+behavior of that model will be dictated paramters, and driven par known disturbances, environmental conditions, 
+it can also process errors 
+
+sub model - observation model
+it generate the sampling from that "data "
+the process of observing the data we got 
+it has observation errors ()
+
+Sub-model : we compare the simulated data with the observed data through statistical test
+
+
+question : sampling fro the posterieur distribution is a way to 
+
+A example of linear model: 
+
+value[i] = a(interception) + b (coef) * mileage[i]
+
+#1 simplyfying assumptions 
+leafs lose value linearly with increasing mileage 
+ R^2: as the parameters in the equation increases, the R^2 increase, until it it the same number of data points. Same  nbrs parameters = same nbrs data point = R^2 is 1

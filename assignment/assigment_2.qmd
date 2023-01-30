@@ -9,6 +9,10 @@ editor: visual
 ```{r setup}
 library(tidyverse)
 library(ggplot2)
+library(broom)
+library(tibble)
+library(purrr)
+library(modelr)
 options(mc.cores = parallel::detectCores(logical=FALSE))
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
 setwd(rprojroot::find_rstudio_root_file())
@@ -30,3 +34,65 @@ this function should take the appropriate stock to Spawner/recruits
 4. using map2(), apply the lm() to the stocks
 5. back-transform the coefficients to normal space 
 6. Create a graph for each stock that shows : 
+
+
+```{r}
+#Step 1:
+data<- read.table(file="data/Sockeye.data", header=TRUE, sep="\t")
+#check class
+class(data)
+
+# i prefer working with tibble, so will transform the data
+data <- data %>% as_tibble()
+
+#Step 2: 
+
+# this nest() will create a dataframe of years, spawner, recruits for each stock
+data.nested <- data %>% group_by(Stock) %>% nest()
+# verifying if it worked : 
+data.nested$data[[1]] # yes!
+
+
+#Step 3: creating a function for ricker spawner, in log-space 
+
+ricker_logspace <- function(df){
+  lm (log( Recruits/Spawners ) ~ Spawners, data = df)
+}
+
+
+#Step 4: using map2(), apply the lm() to the stocks
+# i will store the list of models  by adding a column in the dataframe
+#this will give us one model for each stock 
+data.nested <- data.nested %>% 
+  mutate( model = map(data, ricker_logspace))
+
+#lets confirm  the output is right:
+data.nested$model[1]
+
+#now i want to extract intercept + spawners
+#the function tidy from broom will extract the coefficents (Intercept) + Spawners()
+
+m.coef <- data.nested %>% 
+  mutate( tidied = map(model, tidy)) %>% 
+  unnest(tidied) %>% select(!c("statistic","p.value"))
+
+m.coef <- m.coef %>% 
+  pivot_wider(names_from = term,
+              names_glue = "{term}_{.value}",
+              values_from = c(estimate, std.error))
+# actually that doesn t work because the rows are completely different 
+# i could 
+
+# creating a graph for the stock recruitment relationship for each stock
+
+
+m.coef %>% 
+  unnest(data) %>% 
+  ggplot(aes(x = Spawners, y = Recruits)) + geom_point() + facet_wrap(~ Stock)
+  geom_abline(intercept = `(Intercept)_estimate`, slope = Spawners_estimate) +
+  facet_wrap( ~ Stock)
+#geom_abline(intercept, slope, linetype, color, size)
+#ggpgeom_abline(intercept = intercept, slope = slope, color="red", 
+               #linetype="dashed", size=1.5)
+```
+
