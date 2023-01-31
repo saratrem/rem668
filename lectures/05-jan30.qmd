@@ -66,3 +66,161 @@ cv <- 0.10 # lognormal standard deviation (coefificant of variation)
  # basically, are all the error additive or multiplicative ? 
 ```
 
+
+simulating fake data, than using your model to res-estimate that data - is a very good for test if your model is actual good at estimating data
+
+```{r}
+# lets create a function 
+
+gencounts <- function (iSeed=999,doPlot=FALSE){
+   # step 1 : set some paraeters to control the simulation
+  
+  
+  nt <- 10         # number of years 
+  initN <- 2000    # intial abundance
+  r <- -0.04       # exponential growth rate 
+  cv <- 0.10 # lognormal standard deviation (coefificant of variation)
+  set.seed(seed= iSeed) # to get the same nbr everytime
+  # 2 . vectors to fill
+  
+   N <- vector(length = nt)
+   C <- vector(length = nt)
+  
+   
+   #3 set the initiati abundence : No = initi NT
+   N [1] <- initN
+   
+   # 4 : create  for loop 
+   for( i in 2:nt){
+     N[i] = N[i-1] *exp(r)
+   }
+   
+   #5 simulation counting with errors 
+   # N[t] = N[t] * e[w]
+   
+   C = N * exp(cv* rnorm (n = nt,mean = 0, sd = 1) - cv^2/2)  # ths is the same than rlognormal
+   # there is a bias in rnorm in log space, so you have to ajust for that 
+   
+   # 6 plot the graphs
+   if(doPlot){
+   plot(1:nt,C, ylim = c(0,2250), ylab = "Counts", xlab = "time", pch = 19, col = "red")
+   lines(1 :nt, N, col = "blue", lwd = 3) 
+   }
+   return(C)
+}
+
+
+```
+
+
+estimated growth model : 
+
+this read in counts of 'caribou' and estimatesthe populaion growth rate based on imperfect data
+
+
+step # 1 : read in count data 
+step # 2 : log-transformed count data 
+step # 3 : estimate parameters using lm () function 
+step # 4 : extract info sing summary () function 
+step 5 : extract what are the parameters estimate are
+step 6 : plot estimated pop over simulated pop 
+step 7 : compare simulated and estimated parameters 
+
+```{r estimated growth model }
+#need to source other file if that function is not in this file
+
+#source("directory_path")
+nt <- 10
+t <- 1:nt
+#1 : read in count data
+countData <- gencounts(iSeed= iSeed, doPlot = FALSE) 
+
+#2 : log-transfom count data to make linear so you can lm function()
+# init : logN0 
+# slope is r 
+
+Y <- log(countData)
+
+# 3 : 
+model <- lm( Y ~ t)
+
+# 4 :
+summ <- summary (model)
+
+
+#5 extract oaranet estimates
+rest <- model$coefficients[2]
+N0est <- exp(model$coefficients[1]) # this is in log space, so we need to re-transform in not log space
+
+#6 
+
+
+# i want to repeate this simulation process many many times so i will create a simulation function 
+  
+estgrowthmodel <- function(doPlot=FALSE, iSeed = iSeed){
+  #1 : read in count data
+countData <- gencounts(iSeed=iSeed, doPlot = FALSE) 
+
+#2 : log-transfom count data to make linear so you can lm function()
+# init : logN0 
+# slope is r 
+
+Y <- log(countData)
+
+# 3 : 
+model <- lm( Y ~ t)
+
+# 4 :
+summ <- summary (model)
+
+
+#5 extract oaranet estimates
+rest <- model$coefficients[2]
+N0est <- exp(model$coefficients[1]) # this is in log space, so we need to re-transform in not log space
+
+#6
+if ( doPlot ){
+  lines( exp(model$fitted.values), lty = 2, col = "green", lwd = 3)
+}
+
+out <- list()
+out$r <- rest
+out$N0 <- N0est
+return(out)
+
+}
+
+
+# if I wanted a vecor out : 
+out <- c("r"=NA, "N0" = NA)
+out["r"] <- rest
+out["N0"] <- N0est
+
+
+#7 : compare simulated and estimated parameters
+
+
+nTimes <- 500
+rEst.vec <- vector (length = nTimes)
+N0est.vec <- vector(length = nTimes)
+
+for ( i in 1:nTimes){
+  parms <- estgrowthmodel(iSeed = 999+i)
+  rEst.vec[i] <- parms$r
+  N0est.vec[i] <- parms$N0
+}
+
+
+hist(rEst.vec, breaks = 20)
+abline( v = -0.04, lty = 2, lwd =2, col = "green")
+abline( v = mean(rEst.vec), lty = 2, lwd =2, col = "red")
+
+
+hist(N0est.vec, breaks = 20)
+abline( v = 2000, lty = 2, lwd =2, col = "green")
+abline( v = mean(N0est.vec), lty = 2, lwd =2, col = "red")
+
+##SARA YOU NEEED TO DO THIS WITH YOUR STAN MODEL !!!!!!!!
+
+```
+
