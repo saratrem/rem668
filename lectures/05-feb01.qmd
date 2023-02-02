@@ -1,0 +1,182 @@
+---
+title: "05-feb01"
+format: gfm
+editor: visual
+---
+
+## Week 5 : depletion
+
+catch rate is constant, could still be depletion 
+catching them more efficiently 
+inequal catch 
+
+social side: change in technologies, change in behavior of fisheries ( very good at fishing, versus bad fishing)
+
+as we are catching fish, there is two way to look at what is happening: 
+#1:
+N (t+1) = N(t) * exp(-z)
+this one account through tie - there is always fish dying and always fishing . so it is appropriate for fisheries that happens year long 
+this means the fish cannot be caught twice 
+
+
+#2: 
+N(t+t) = Nt- Ct 
+ct = is instantaneous catch rate 
+this is a straight line! so linear model 
+this is good for short time period, example : electrofishing 
+
+it can be reformulate as Nt = No- Kt ( k = sum of catch at time t), No = initial abundance ( which we don t know!)
+
+
+c/ e = c(t)/effort(t) = q*N(t) 
+q= C/(effort * Nabundance)
+
+this formula below ends up being our lineiar model b - mX: 
+Catch/effort(t) = q * N0 - q * K ( k is our data/ independant information)
+
+we need to estimate catchability to know abundance
+
+
+```{r setup}
+options(mc.cores = parallel::detectCores(logical=FALSE))
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+setwd(rprojroot::find_rstudio_root_file())
+```
+
+simulation depletion 
+
+this codes simulate deplition data unsing electrofishing or whater 
+
+# 1. set control parameters
+#2. declare vectors for abundance and catch 
+#3 . initialise abundance
+#4. loop over the sampling occasions 
+#5 plot stuff 
+
+```{r}
+
+#1 : set control parameters
+
+initN <- 200    #initial abundance
+q <- 0.05       # catchabilitity uniti - catch / ( abundance * Effort)
+nDep <- 3 # number of depletion events
+e <- rlnorm(n = nDep, meanlog = log(5), sd = 0.2) # electrofishing effort in each pass 
+
+#2 :
+N <- vector( length = nDep + 1)
+C <- vector( length = nDep)
+
+#3 
+N[1] <- initN
+
+#4loop over sampling occasions
+
+for(i in 1:nDep){
+  C[i] <- rbinom(n= 1, size = N[i], prob = q * e[i])
+  N[i +1] <- N[i] - C[i]
+}
+
+C
+plot(N)
+
+k <- c(0,cumsum(C))
+
+
+# plot some stufff
+
+plot(C/e ~k[1:nDep], pch = 19, col = "blue", ylim = c(0, max(C/e)), ylab = "Catch per unit effort", xlab = expression(paste("Cummulative catch (", sum(italic(C)[italic(t)], italic(t) ==0,),italic(T), ")")))
+
+
+```
+
+
+
+```{r create a function earlier code}
+
+sim_dep <- function(nDep= 3, initN =200, meanE= 5, seed= 999, doPlot= FALSE){
+initN <- initN    #initial abundance
+q <- 0.05       # catchabilitity uniti - catch / ( abundance * Effort)
+nDep <- 3 # number of depletion events
+e <- rlnorm(n = nDep, meanlog = log(meanE), sd = 0.2) # electrofishing effort in each pass 
+set.seed(seed)
+
+#2 :
+N <- vector( length = nDep + 1)
+C <- vector( length = nDep)
+
+#3 
+N[1] <- initN
+
+#4loop over sampling occasions
+
+for(i in 1:nDep){
+  C[i] <- rbinom(n= 1, size = N[i], prob = q * e[i])
+  N[i +1] <- N[i] - C[i]
+}
+
+C
+plot(N)
+
+k <- c(0,cumsum(C))
+
+
+# plot some stufff
+if(doPlot){
+plot(C/e ~k[1:nDep], 
+     pch = 19, col = "blue", 
+     ylim = c(0, max(C/e)), 
+     ylab = "Catch per unit effort", xlab = expression(paste("Cummulative catch (", sum(italic(C)[italic(t)], italic(t) ==0,),italic(T), ")")))
+}
+out <- list()
+out$C <- C
+out$E <- e
+out$N <- N
+return(out)
+}
+
+
+estDep <- function(nrep = 100, numDep =3, meanE = 5, startseed= 999, doPlot = FALSE){
+  estq <- vector(length = nrep)
+  estN0 <- vector(length = nrep)
+  
+  for(i in 1:nrep){
+    iseed <- i + startseed
+    simdata<- sim_dep(nDep= numDep, initN =200, meanE= meanE, seed= iseed, doPlot= doPlot)
+    C <- simdata$C
+    E <- simdata$E
+    CPUE <- C/E
+    K <- c(0,cumsum(C))
+    fit <- lm(CPUE ~ K[1:numDep])
+    summ <- summary(fit)
+    estq[i] <- -summ$coefficients[2]
+    estN0[i] <- summ$coefficients[1]/estq[i]
+  }
+  
+  par(mfcol = c(2,1))
+  hist(estq, breaks = 15)
+  abline(v =mean(estq), col = "red", lty = 2, lwd = 3)
+  abline( v =0.05, col = "blue", lwd= 3)
+  
+  hist(estN0, breaks =15)
+  abline(v =mean(estN0), col = "red", lty = 2, lwd = 3)
+  abline( v =initN, col = "blue", lwd= 3)
+}
+
+
+```
+
+
+```{r}
+
+#continous distribution :
+#normal distribution and lognormal distribution 
+
+hist(rlnorm(1000,0,1))
+plot(rlnorm(1000,0,1))
+
+hist(rnorm(1000,0,1))
+plot(rnorm(1000,0,1))
+
+
+```
+
