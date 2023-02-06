@@ -162,7 +162,12 @@ estDep <- function(nrep = 100, numDep =3, meanE = 5, startseed= 999, doPlot = FA
   abline( v =initN, col = "blue", lwd= 3)
 }
 
-
+# issue with model : it gets tricky when low adbundance for N0 
+# you get negative abundance = that s is imposssible!!
+# variance is so extreme 
+# answer to this : have more data points 
+# higher catchability or do it more sampling events
+# this is a power analysis exercises! to think about sampling methods, 
 ```
 
 
