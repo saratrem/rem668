@@ -4,4 +4,53 @@ format: gfm
 editor: visual
 ---
 
-##Weeek 6 : 
+##Weeek 6 :
+
+```{r setup}
+library(tidyverse)
+library(cowplot); theme_set(theme_cowplot())
+library(patchwork)
+
+
+options(mc.cores = parallel::detectCores(logical=FALSE))
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file()) 
+setwd(rprojroot::find_rstudio_root_file())
+
+```
+
+##logistic growth this is an equalibirum model - so there is a looot of assumptions r = maxium rate of growth K = carrying capacity
+
+equation
+
+$$
+\frac{d_r}{d_t} = rN(1-\frac{N}{K} )
+$$
+
+$$
+N_t+1 = N_t +rN_t(1-\frac{N}{K} )
+$$
+
+growth rate slow down = difference between N and N+1 diminish as the population growth
+
+at the top of the logistical grwth , that s where the (NT+1 - Nt) is the biggest!higgest recruitment! how to calculate !! slope of r (growth r) is positive until it is negative so we need to find when the slope of growth is 0 So we take the derivative 
+$$
+rN - \frac{r}{k}N^2 = 0
+$$
+SOOOOOOO it ends up being : 
+$$
+N_msy = K/2
+$$
+
+at equlibrium, N t+1 = N t
+$$
+U_{msy} = \frac{r}{2}
+$$
+
+How high is the curve ( aka what is the $\delta$N)
+
+
+```{r}
+
+
+
+```
