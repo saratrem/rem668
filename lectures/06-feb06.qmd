@@ -48,9 +48,142 @@ $$
 
 How high is the curve ( aka what is the $\delta$N)
 
+## logistic growth model
+this model simlulates population observations using the logistic growth model 
+
+pseudocode
+
+1. set up your parameters
+2. creating vectors of variables to fill 
+3. initialize the model 
+4. for loooooop over time 
+5. plot our findings
+6. calculate MSY variables
+
+
+just kidding we are bootstrapping !!
+
 
 ```{r}
+#1
+r <-  0.2 # max growth rate
+k <- 10000 # carrying cap
+N0 <- k # initialise abundance
+u <- 0.2 # exploitation rate 
+q <- 0.01 # fishery independant catchability 
+cv <- 0.1 # process error
+nT <- 20 # nbr of annual time-step
+
+#2 create vectors of variables to fill
+Nt <- vector(length = nT+1) # abundance at time t
+Ct <- vector(length = nT) # catch in fisherie
+It <- vector(length = nT) # fishert independant abundance index
+
+#3 
+Nt[1] <- N0
+
+
+#4 
+for ( i in 1:nT){
+  Ct[i] <- Nt[i] * u
+  Nt[i +1] <- (Nt[i] + r*Nt[i]* (1 - Nt[i]/k) -Nt[i]*u) * exp(rnorm(1, mean = 0, sd= cv)) #schaefer model with lognormal error
+  It[i] <- Nt[i] * q
+}
+
+# q and stock asssessment are usually estimate in 2 different models
+df <- tibble(time = 1:nT,
+             Nt = Nt[1:nT],
+        Ct = Ct,
+        It = It)
+
+ggplot(data = df, aes(x = time, y = Nt)) + geom_point(alpha = 0.7) + geom_line(color = "darkgreen", alpha = 0.5) + geom_point(aes( x = time, y =Ct), colour = "darkred", alpha =0.7) + geom_point(aes( x = time, y =It), colour = "darkblue", alpha =0.7)+ geom_hline(yintercept = MSY, color = "orange") + theme_cowplot()
+
+
+
+
+# 6 msy variables: 
+
+N_MSY <- k/2
+U_MSY <- r/2
+MSY <- r*k/4
+
 
 
 
 ```
+
+```{r logistic growth}
+nT <- 20 # nbr of annual time-step
+
+gen_data <- function(doPlot= FALSE){
+
+r <-  0.2 # max growth rate
+k <- 10000 # carrying cap
+N0 <- k # initialise abundance
+u <- 0.2 # exploitation rate 
+q <- 0.01 # fishery independant catchability 
+cv <- 0.1 # process error
+
+
+#2 create vectors of variables to fill
+Nt <- vector(length = nT+1) # abundance at time t
+Ct <- vector(length = nT) # catch in fisherie
+It <- vector(length = nT) # fishert independant abundance index
+
+#3 
+Nt[1] <- N0
+
+
+#4 
+for ( i in 1:nT){
+  Ct[i] <- Nt[i] * u
+  Nt[i +1] <- (Nt[i] + r*Nt[i]* (1 - Nt[i]/k) -Nt[i]*u) * exp(rnorm(1, mean = 0, sd= cv)) #schaefer model with lognormal error
+  It[i] <- Nt[i] * q
+}
+
+# q and stock asssessment are usually estimate in 2 different models
+df <- tibble(time = 1:nT,
+             Nt = Nt[1:nT],
+        Ct = Ct,
+        It = It)
+if (doPlot){
+ggplot(data = df, aes(x = time, y = Nt)) + geom_point(alpha = 0.7) + geom_line(color = "darkgreen", alpha = 0.5) + geom_point(aes( x = time, y =Ct), colour = "darkred", alpha =0.7) + geom_point(aes( x = time, y =It), colour = "darkblue", alpha =0.7)+ geom_hline(yintercept = MSY, color = "orange") + theme_cowplot()
+  
+}
+
+
+
+# 6 msy variables: 
+
+N_MSY <- k/2
+U_MSY <- r/2
+MSY <- r*k/4
+
+
+out <- list()
+out$Nt <- Nt
+out$Ct <- Ct
+out$It <- It
+return(out)
+}
+
+fake_data <- gen_data()
+
+
+data_df <-tibble(Nt = fake_data$Nt[1:20],
+                 Ct =fake_data$Ct,
+                 It= fake_data$It)
+
+```
+
+
+```{r bootstrp}
+
+#bootstrap data 100 times
+for( i in 1:1000){
+  boot_data <- sample(data_df$It, replace= TRUE, prob = NULL) 
+  cbind(data_df, boot_data)
+}
+
+```
+
