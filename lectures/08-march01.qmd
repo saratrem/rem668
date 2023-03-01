@@ -1,0 +1,63 @@
+---
+title: "08-march01"
+format: gfm
+editor: visual
+---
+
+## age-structure models
+( it think that it is what im doing)
+
+
+N(t,a) = N(t+1, a-1)
+N(2,2) = N(1,1) * S
+
+S = S(t)
+S = S* (1-U)
+S= exp(-(m+f))
+
+
+*stock reconstruction analysis model:*
+
+it was uses in commercial fisheries everywhere. 
+catch abundances and index of abundances ( independant of fisheries)
+N- hat and catches- observed
+
+N_hat = (number of fish that were there- catch abundance) * survival rate 
+
+we need to specifically estimate how many fish was there at the first year, 
+and estimate the recruits 
+
+we need to do a catch _ predicted : 
+
+the observed catches influence the next year abundance, so when we need to estimate our initial abundance
+
+It works for forward progression abundances
+
+*Virtual Population Analysis VPA* 
+backward progression of abundance
+we have numbers now, so what was the population numbers a year ago ?
+
+if we assume that numbers now are = (N[t-1] - C[t-1])* Survival
+if we solve for  N[t-1, a1] = (Nta/ S)+ Catch
+
+* the trick is to add another  extra life class year, ( like age 7 even if the age 6 is max), and you can put zero since you know for a fact you didnt catch any ! 
+
+"conditioning on " means = using actual data to inform your prediction of the process model,
+example = conditioning on catch or condition on catch effort 
+
+VPA got a back reputation over times, 
+there is some assumptions : catch are a representation of the total of fish, and proportion aging error 
+
+baseline genetic survey could help potentially ? milo atkinson 
+
+classic errors: northern cod stock, they used a VPA ( the interpretation of the data was bad)
+you are fitting on the data on the index of abundance and catch effor , they use trawling and acoustic survey, 
+the number in the fisheries independent survey were going down, yet the fisheries were always high. 
+
+what was happening : the cod was going down, and they moved and the fish  over-agggregated in one spot so that s why the fishermans were still having high catches
+
+
+
+
+
+
