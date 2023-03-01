@@ -1,0 +1,149 @@
+---
+title: "07-feb13"
+format: gfm
+editor: visual
+---
+##Weeek 6 :
+
+```{r setup}
+library(tidyverse)
+library(cowplot); theme_set(theme_cowplot())
+library(patchwork)
+
+
+options(mc.cores = parallel::detectCores(logical=FALSE))
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file()) 
+setwd(rprojroot::find_rstudio_root_file())
+
+```
+
+
+*Sum of squares*:
+
+SS = (Obs- Pred)^2
+because the observations are square - if the data point is really far away, it will have more weight than a data point that is closer to the fitted normal distribution.
+
+
+*Likelihood function*: 
+consider a measure of how likely some data are. 
+
+YOu need to choose error distributions based on the following processes: 
+- discrete vs continuous:
+- Unconstrained vs constrained ( can it be positive, negative, between 0 and 1 ?!?)
+- Additive vs multiplicative
+
+
+Know your distributions ( hillborn and mangold ?? is a good fisheries resource the prof said )
+
+
+think about what the distribution of your residuals of your model is supposed to look!!
+
+*work from excel sheet *
+
+there is a dynamic model, observation model, a statistical fitting criteria
+
+Feb 15 
+```{r}
+# data 
+
+nyr <- 25
+Et <- exp(rnorm(n = nyr, mean = 2, sd =0.2))
+Nt <- vector(length = nyr)
+Ct <- vector(length = nyr)
+qdev <- rnorm(nyr, mean = 0, sd = 0.1)
+
+# parameter
+r <- 0.2
+K <- 1000
+q <- 0.02
+
+# procedures 
+"DynSim" <- function(r,K,q){
+
+  Nt[1] <<- K
+  for (t in 1 :nyr){
+    Ct[t] <<- q * Et[t] * Nt[t] * exp(qdev[t])
+    Nt[t +1] <<- Nt[t] + r* Nt[t] * (1 - Nt[t]/K) - Ct[t]
+  }
+  #return(Nt)
+}
+
+
+# this create the observation model 
+"DynEst" <- function(pars){
+  r <- pars[1]
+  K <- pars[2]
+  q <- pars[3]
+  
+  Nt[1] <- K
+   for (t in 1 :nyr){
+    Ct[t] <- q * Et[t] * Nt[t] 
+    Nt[t +1] <- Nt[t] + r* Nt[t] * (1 - Nt[t]/K) - Ct[t]
+   }
+  out <- list()
+  out$Ct <- Ct
+  out$Nt <- Nt
+  return(out)
+}
+
+#this function create likelihood function 
+
+"Likelihood" <- function(pars){
+  Pred_Ct <- DynEst(pars = pars)$Ct
+  SS <- sum((Fake_Ct - Pred_Ct)^2)
+  return(SS)
+}
+
+"solver" <- function(pars){
+  fit <- optim(par = pars, fn= Likelihood, method= "BFGS")
+  return(fit)
+}
+
+
+"repeat" <- function(niter = 1000){
+  
+  r_vec <- vector(length=niter)
+  K_vec <- vector(length=niter)
+  q_vec <- vector(length=niter)
+  
+  for( i in 1:niter){
+    DynSim(r=r, K=K, q =q)
+    Fake_Ct <<- Ct
+    
+    fit <- solver(pars = c(r,K,q))
+    r_vec[i] <- fit$par[1]
+    K_vec[i] <- fit$par[2]
+    q_vec[i] <- fit$par[3]
+  }
+  
+  par(mfcol = c(3,1))
+  hist(r_vec, breaks =50,xlab = "r")
+  hist(K_vec, breaks = 50, xlab = "k")
+  hist(q_vec, breaks = 50, xlab = "q")
+
+}
+
+
+
+#main section 
+
+DynSim(r=r, K=K, q =q)
+Fake_Ct <- Ct
+
+
+par(mfcol= c(2,1)) #changing the plot visualition 
+plot(1:nyr, Nt[1:nyr], type = "p", pch = 19, xlab = "Year", ylab = "Abundance")
+tempNt <-  DynEst( pars = c (r,K,q))
+lines(1:nyr, tempNt$Nt[1:nyr], col = "red")
+
+Likelihood(pars = c (r,K,q))
+fit <- solver(pars = c (r,K,q)) # optimisating r, k , q
+tempNt2 <- DynEst(pars = fit$par)
+lines(1:nyr, tempNt2$Nt[1:nyr], col = "blue")
+
+
+plot( 1:nyr, Fake_Ct, type = "p", pch = 19, xlab = "year", ylab = "Catch")
+lines( 1:nyr, tempNt2$Ct, col = "blue")
+```
+
+
