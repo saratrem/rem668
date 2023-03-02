@@ -57,7 +57,9 @@ the number in the fisheries independent survey were going down, yet the fisherie
 what was happening : the cod was going down, and they moved and the fish  over-agggregated in one spot so that s why the fishermans were still having high catches
 
 
+*SCA- Statistical catch at age Analysis*
 
+forward projecting!
+you need to estimate your vulnerability rate, 
 
-
-
+**SARA** check how he creates his survival R , 1 * (exp(-M))
