@@ -1,0 +1,12 @@
+---
+title: "09-march08"
+format: gfm
+editor: visual
+---
+
+## Week n9 
+
+this class is going downhill : eveyrthing is on excel for state space model
+see "spatial.xlx"
+
+
